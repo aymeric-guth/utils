@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name='actors',
+    name='utils',
     version='0.0.1',
     license='GPLv2+',
-    url='https://git.ars-virtualis.org/yul/actors',
-    description='Actor Model micro-framework',
+    url='https://git.ars-virtualis.org/yul/utils',
+    description='Misc utils',
     author_email='aymeric.guth@protonmail.com',
     author='Aymeric Guth',
     packages=find_packages(),

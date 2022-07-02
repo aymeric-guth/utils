@@ -285,3 +285,4 @@ pymakr.conf
 .deactivate.sh
 
 docs/
+.envrc

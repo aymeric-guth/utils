@@ -22,4 +22,11 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
+    entry_points={
+        "console_scripts": [
+            "is_kebab_case=utils.cli:is_kebab_case",
+            "is_snake_case=utils.cli:is_snake_case",
+            "is_lower_case=utils.cli:is_lower_case",
+        ]
+    },
 )

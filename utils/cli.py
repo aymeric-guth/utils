@@ -1,6 +1,8 @@
 from typing import Optional, Callable
 import sys
 import re
+import pathlib
+import ast
 
 
 class StatusCode:
@@ -39,6 +41,9 @@ failure = StatusCode.failure
 
 
 def _is_kebab_case(s: str) -> int:
+    """
+    s: str
+    """
     if match_snake.search(s):
         return failure()
     elif match_kebab.search(s):
@@ -47,6 +52,9 @@ def _is_kebab_case(s: str) -> int:
 
 
 def _is_snake_case(s: str) -> int:
+    """
+    s: str
+    """
     if match_kebab.search(s):
         return failure()
     elif match_snake.search(s):
@@ -55,6 +63,9 @@ def _is_snake_case(s: str) -> int:
 
 
 def _is_lower_case(s: str) -> int:
+    """
+    s: str
+    """
     # "^(?:(?!:hede).)*$"
     if match_snake.search(s):
         return failure()
@@ -66,10 +77,16 @@ def _is_lower_case(s: str) -> int:
 
 
 def _is_camel_case(s: str) -> int:
+    """
+    s: str
+    """
     raise NotImplementedError(s)
 
 
 def _is_pascal_case(s: str) -> int:
+    """
+    s: str
+    """
     raise NotImplementedError(s)
 
 
@@ -85,8 +102,40 @@ def is_lower_case() -> int:
     return entrypoint_one_arg(_is_lower_case)
 
 
+def _parse_version(path: str) -> int:
+    """
+    usage: parse_version /path/to/version/file
+    """
+    p = pathlib.Path(path).resolve()
+    if p.suffix != ".py":
+        return failure(f"extension {p.suffix} not supported")
+    if not p.exists():
+        return failure("version file does not exists")
+    tree = ast.parse(p.read_text())
+    candidates = [node for node in tree.body if isinstance(node, ast.Assign)]
+    if not candidates:
+        return failure(f"could not find a suitable node in {p!s}")
+    try:
+        version = [
+            node.value.value
+            for node in candidates
+            if node.targets[0].id == "__version__"
+        ]
+    except Exception as e:
+        return failure(f"unexpected error: {e}")
+    if not version:
+        return failure(f"could not find version in {p!s}")
+    if len(version) > 1:
+        return failure(f"got multiple versions for file {p!s}")
+    return success(version[0])
+
+
+def parse_version() -> int:
+    return entrypoint_one_arg(_parse_version)
+
+
 def entrypoint_one_arg(fnc: Callable[[str], int]) -> int:
     StatusCode.shell_mode()
     if len(sys.argv) != 2:
-        return failure(f"{fnc.__name__[1:]} requires one positional argument")
+        return failure(f"{fnc.__doc__}")
     return fnc(sys.argv[1])

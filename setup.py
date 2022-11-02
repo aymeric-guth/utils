@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="utils",
-    version="0.0.1",
+    version="0.0.3",
     license="GPLv2+",
     url="https://git.ars-virtualis.org/yul/utils",
     description="Misc utils",
@@ -27,6 +27,7 @@ setup(
             "is_kebab_case=utils.cli:is_kebab_case",
             "is_snake_case=utils.cli:is_snake_case",
             "is_lower_case=utils.cli:is_lower_case",
+            "parse_version=utils.cli:parse_version",
         ]
     },
 )

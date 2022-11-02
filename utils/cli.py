@@ -15,20 +15,27 @@ class StatusCode:
     def default_mode(cls):
         StatusCode.FAILURE, StatusCode.SUCCESS = 0, 1
 
-    def __init__(self, code: int):
-        self.status = code
-
-    def __call__(self, msg: Optional[str] = "") -> int:
+    @classmethod
+    def msg(cls, msg: Optional[str] = "") -> None:
         if msg:
             sys.stdout.write(f"{msg}\n")
-        return self.status
+
+    @classmethod
+    def success(cls, msg: Optional[str] = "") -> int:
+        StatusCode.msg(msg)
+        return StatusCode.SUCCESS
+
+    @classmethod
+    def failure(cls, msg: Optional[str] = "") -> int:
+        StatusCode.msg(msg)
+        return StatusCode.FAILURE
 
 
 match_kebab = re.compile(r"[\-]+[a-z0-9]*")
 match_snake = re.compile(r"[\_]+[a-z0-9]*")
 match_lower = re.compile(r"^[a-z0-9]+$")
-success = StatusCode(StatusCode.SUCCESS)
-failure = StatusCode(StatusCode.FAILURE)
+success = StatusCode.success
+failure = StatusCode.failure
 
 
 def _is_kebab_case(s: str) -> int:

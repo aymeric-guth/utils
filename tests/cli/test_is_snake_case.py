@@ -1,12 +1,7 @@
 import pytest
 
-from utils.cli import _is_snake_case, StatusCode
+from utils.cli import is_snake_case, StatusCode
 from tests.cli import common  # type: ignore
-
-
-@pytest.fixture(autouse=True, scope="session")
-def env_setup():
-    StatusCode.default_mode()
 
 
 params = [
@@ -21,4 +16,5 @@ params = [
 
 @pytest.mark.parametrize(("s", "expected"), params)
 def test_is_snake_case(s, expected):
-    assert _is_snake_case(s) == expected
+    _, status = is_snake_case(s)
+    assert status == expected

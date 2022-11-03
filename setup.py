@@ -24,10 +24,11 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "is_kebab_case=utils.cli:is_kebab_case",
-            "is_snake_case=utils.cli:is_snake_case",
-            "is_lower_case=utils.cli:is_lower_case",
-            "parse_version=utils.cli:parse_version",
+            "is_kebab_case=utils.cli:_is_kebab_case",
+            "is_snake_case=utils.cli:_is_snake_case",
+            "is_lower_case=utils.cli:_is_lower_case",
+            "parse_version=utils.cli:_parse_version",
+            "generate_eggname=utils.cli:_generate_eggname",
         ]
     },
 )

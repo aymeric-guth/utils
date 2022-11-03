@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-from utils.cli import _parse_version, success, failure
+from utils.cli import parse_version, StatusCode
 
 
 root = pathlib.Path(__file__).parent
@@ -27,32 +27,37 @@ def env_setup():
 
 def test_parse_version_path_invalid():
     arg = str(env_root / "file.py")
-    assert _parse_version(arg) == failure()
+    _, status = parse_version(arg)
+    assert status == StatusCode.FAILURE
 
 
 def test_parse_version_invalid_file():
     f = env_root / "file.file"
     f.touch()
     arg = str(f)
-    assert _parse_version(arg) == failure()
+    _, status = parse_version(arg)
+    assert status == StatusCode.FAILURE
 
 
 def test_parse_version_no_assign_node():
     f = env_root / "file.py"
     f.write_text("import sys\n")
     arg = str(f)
-    assert _parse_version(arg) == failure()
+    _, status = parse_version(arg)
+    assert status == StatusCode.FAILURE
 
 
 def test_parse_version_one_assign_node_with_version():
     f = env_root / "file.py"
     f.write_text("import sys\n__version__ = '0.0.0'\n")
     arg = str(f)
-    assert _parse_version(arg) == success()
+    _, status = parse_version(arg)
+    assert status == StatusCode.SUCCESS
 
 
 def test_parse_version_multiple_assign_node_with_version():
     f = env_root / "file.py"
     f.write_text("import sys\n__version__ = '0.0.0'\n__version__ = '1.0.0'\n")
     arg = str(f)
-    assert _parse_version(arg) == failure()
+    _, status = parse_version(arg)
+    assert status == StatusCode.FAILURE

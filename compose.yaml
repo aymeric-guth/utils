@@ -1,0 +1,9 @@
+services:
+  app:
+    container_name: $PROJECT_NAME
+    build:
+      context: .
+      args: 
+        DOCKER_IMAGE: $DOCKER_IMAGE
+        PROJECT_NAME: $PROJECT_NAME
+    entrypoint: pytest tests

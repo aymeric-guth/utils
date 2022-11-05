@@ -104,7 +104,7 @@ def check_env(varname: str) -> tuple[str, int]:
 
 def parse_version(path: str) -> tuple[str, int]:
     """
-    usage: parse_version /path/to/version/file
+    usage: parse_version [/path/to/version/file.py]
     """
     p = pathlib.Path(path).resolve()
     if p.suffix != ".py":
@@ -154,6 +154,7 @@ def generate_eggname(suffix: str) -> tuple[str, int]:
 def expand_envvar_toml(s: str) -> tuple[str, int]:
     while m := match_envvar.search(s):
         a, b = m.span()
+        # TODO: check_env
         val = os.getenv(m.group(1))
 
         if not val:
@@ -175,6 +176,18 @@ def _is_lower_case() -> int:
 
 
 def _parse_version() -> int:
+    """
+    parse_version [/path/to/version/file]
+    """
+    if len(sys.argv) == 1:
+        (workspace, ok) = check_env("WORKSPACE")
+        if not ok:
+            return sh_fnc(failure)(workspace)
+        (project_name, ok) = check_env("PROJECT_NAME")
+        if not ok:
+            return sh_fnc(failure)(project_name)
+        path = pathlib.Path(workspace) / project_name / "__init__.py"
+        sys.argv.append(str(path))
     return entrypoint_one_arg(parse_version)
 
 

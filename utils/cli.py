@@ -1,5 +1,5 @@
 import functools
-from typing import Optional, Callable, Union
+from typing import Callable
 import os
 import sys
 import re
@@ -20,6 +20,7 @@ success = functools.partial(retval, status=StatusCode.SUCCESS)
 match_kebab = re.compile(r"[\-]+[a-z0-9]*")
 match_snake = re.compile(r"[\_]+[a-z0-9]*")
 match_lower = re.compile(r"^[a-z0-9]+$")
+match_envvar = re.compile(r"\$([A-Z_][A-Z0-9_]+)")
 
 
 def sh_fnc(fnc: Callable[[str], tuple[str, int]]):
@@ -150,6 +151,17 @@ def generate_eggname(suffix: str) -> tuple[str, int]:
     return success(f"{project_name}-{version}-{suffix}")
 
 
+def expand_envvar_toml(s: str) -> tuple[str, int]:
+    while m := match_envvar.search(s):
+        a, b = m.span()
+        val = os.getenv(m.group(1))
+
+        if not val:
+            return failure(f"{val} is not defined")
+        s = s[:a] + val + s[b:]
+    return success(s)
+
+
 def _is_snake_case() -> int:
     return entrypoint_one_arg(is_snake_case)
 
@@ -170,7 +182,18 @@ def _generate_eggname() -> int:
     return entrypoint_one_arg(generate_eggname)
 
 
+def _expand_toml() -> int:
+    return entrypoint_stdin(expand_envvar_toml)
+
+
 def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
     if len(sys.argv) != 2:
         return sh_fnc(failure)(f"{fnc.__doc__}")
     return sh_fnc(fnc)(sys.argv[1])
+
+
+def entrypoint_stdin(fnc: Callable[[str], tuple[str, int]]) -> int:
+    raw = "".join(sys.stdin.readlines())
+    if not raw:
+        return sh_fnc(failure)(f"{fnc.__doc__}")
+    return sh_fnc(fnc)(raw)

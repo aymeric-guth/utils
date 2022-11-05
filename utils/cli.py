@@ -37,12 +37,12 @@ def sh_fnc(fnc: Callable[[str], tuple[str, int]]):
     return inner
 
 
-def to_snake_case(s: str) -> str:
-    return "_".join(s.split("-"))
+def to_snake_case(s: str) -> tuple[str, int]:
+    return success("_".join(s.split("-")))
 
 
-def to_kebab_case(s: str) -> str:
-    return "-".join(s.split("_"))
+def to_kebab_case(s: str) -> tuple[str, int]:
+    return success("-".join(s.split("_")))
 
 
 def is_kebab_case(s: str) -> tuple[str, int]:
@@ -197,6 +197,14 @@ def _generate_eggname() -> int:
 
 def _expand_toml() -> int:
     return entrypoint_stdin(expand_envvar_toml)
+
+
+def _to_snake_case() -> int:
+    return entrypoint_one_arg(to_snake_case)
+
+
+def _to_kebab_case() -> int:
+    return entrypoint_one_arg(to_kebab_case)
 
 
 def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:

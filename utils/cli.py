@@ -12,6 +12,36 @@ class StatusCode:
     FAILURE = 0
 
 
+class Environment:
+    def __init__(self):
+        self._registry: dict[str, str] = {}
+
+    def _register(self, varname: str) -> tuple[str, int]:
+        (msg, ok) = check_env(varname)
+        if not ok:
+            return failure(msg)
+        self._registry.update({varname: msg})
+        return success(msg)
+
+    def get(self, varname: str) -> str:
+        value = self._registry.get(varname)
+        if not value:
+            raise RuntimeError(f"Unexpected runtime error for {varname=} lookup")
+        return value
+
+    def query(self, varname: str) -> tuple[str, int]:
+        value = self._registry.get(varname)
+        if not value:
+            return self._register(varname)
+        return success(value)
+
+    def set(self, varname: str, value: str) -> tuple[str, int]:
+        prev = self._registry.get(varname)
+        if not prev or value != prev:
+            self._registry.update({varname: value})
+        return success(value)
+
+
 retval = lambda msg="", status=0: (msg, status)
 failure = functools.partial(retval, status=StatusCode.FAILURE)
 success = functools.partial(retval, status=StatusCode.SUCCESS)

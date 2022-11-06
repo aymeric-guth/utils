@@ -1,5 +1,5 @@
 import functools
-from typing import Callable
+from typing import Callable, Any
 import os
 import sys
 import re
@@ -53,7 +53,7 @@ match_lower = re.compile(r"^[a-z0-9]+$")
 match_envvar = re.compile(r"\$([A-Z_][A-Z0-9_]+)")
 
 
-def sh_fnc(fnc: Callable[[str], tuple[str, int]]):
+def sh_fnc(fnc: Callable[[Any], tuple[str, int]]):
     def inner(*args, **kwargs) -> int:
         (msg, status) = fnc(*args, **kwargs)
 
@@ -241,12 +241,6 @@ def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
     if len(sys.argv) != 2:
         return sh_fnc(failure)(f"{fnc.__doc__}")
     return sh_fnc(fnc)(sys.argv[1])
-
-
-def entrypoint_no_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
-    if len(sys.argv) != 1:
-        return sh_fnc(failure)(f"{fnc.__doc__}")
-    return sh_fnc(fnc)()
 
 
 def entrypoint_stdin(fnc: Callable[[str], tuple[str, int]]) -> int:

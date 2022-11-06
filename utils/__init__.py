@@ -2,13 +2,15 @@ from typing import Callable, Any
 
 from .config import Config
 from . import cli
+from . import fnc
 
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 
 __all__ = [
     "Config",
     "cli",
+    "fnc",
     "clamp",
     "to_snake_case",
     "to_kebab_case",

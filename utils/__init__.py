@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Any
 
 from .config import Config
 from . import cli
@@ -70,5 +70,25 @@ def lin_intp(v: int, xa: int, ya: int, xb: int, yb: int) -> int:
 def _lin_intp(xa: int, ya: int, xb: int, yb: int) -> Callable[[int], int]:
     def inner(v: int):
         return (v - xa) * (yb - xb) // (ya - xa) + xb
+
+    return inner
+
+
+def default_exc(fnc: Callable[[Any], Any], default: Any) -> Callable:
+    def inner(*args, **kwargs) -> Any:
+        try:
+            return fnc(*args, **kwargs)
+        except Exception:
+            return default
+
+    return inner
+
+
+def default_null(fnc: Callable[[Any], Any], default: Any) -> Callable:
+    def inner(*args, **kwargs) -> Any:
+        retval = fnc(*args, **kwargs)
+        if retval is None:
+            return default
+        return retval
 
     return inner

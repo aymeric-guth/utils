@@ -117,9 +117,9 @@ def parse_version(path: str) -> tuple[str, int]:
         return failure(f"could not find a suitable node in {p!s}")
     try:
         version = [
-            node.value.value
+            node.value.value  # type: ignore
             for node in candidates
-            if node.targets[0].id == "__version__"
+            if node.targets[0].id == "__version__"  # type: ignore
         ]
     except Exception as e:
         return failure(f"unexpected error: {e}")
@@ -163,18 +163,6 @@ def expand_envvar_toml(s: str) -> tuple[str, int]:
     return success(s)
 
 
-def _is_snake_case() -> int:
-    return entrypoint_one_arg(is_snake_case)
-
-
-def _is_kebab_case() -> int:
-    return entrypoint_one_arg(is_kebab_case)
-
-
-def _is_lower_case() -> int:
-    return entrypoint_one_arg(is_lower_case)
-
-
 def _parse_version() -> int:
     """
     parse_version [/path/to/version/file]
@@ -189,6 +177,18 @@ def _parse_version() -> int:
         path = pathlib.Path(workspace) / project_name / "__init__.py"
         sys.argv.append(str(path))
     return entrypoint_one_arg(parse_version)
+
+
+def _is_snake_case() -> int:
+    return entrypoint_one_arg(is_snake_case)
+
+
+def _is_kebab_case() -> int:
+    return entrypoint_one_arg(is_kebab_case)
+
+
+def _is_lower_case() -> int:
+    return entrypoint_one_arg(is_lower_case)
 
 
 def _generate_eggname() -> int:

@@ -261,6 +261,23 @@ def _to_kebab_case() -> int:
     return entrypoint_one_arg(to_kebab_case)
 
 
+def match_pairs(f1: str, f2: str) -> tuple[str, int]:
+    with open(f1) as f:
+        ref = {i for i in f.read().split("\n")}
+    with open(f2) as f:
+        cmp = f.read().split("\n")
+
+    return success("\n".join([i for i in cmp if i in ref]))
+
+
+def _match_pairs() -> int:
+    fnc = match_pairs
+    if len(sys.argv) != 3:
+        return sh_fnc(failure)(f"{fnc.__doc__}")
+
+    return sh_fnc(fnc)(*sys.argv[1:])
+
+
 def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
     if len(sys.argv) != 2:
         return sh_fnc(failure)(f"{fnc.__doc__}")

@@ -13,6 +13,7 @@ __all__ = [
     "failure",
     "success",
     "py_fnc",
+    "sh_fnc",
     "to_snake_case",
     "to_kebab_case",
     "is_kebab_case",
@@ -295,6 +296,7 @@ def _match_pairs() -> int:
 def editor(argv: list[str]) -> tuple[str, int]:
     import subprocess
     import shutil
+    import shlex
 
     def is_available(name: str):
         return shutil.which(name) is not None
@@ -302,16 +304,17 @@ def editor(argv: list[str]) -> tuple[str, int]:
     env = os.environ.copy()
     if is_available("nvim"):
         env.update({"XDG_CONFIG_HOME": os.getenv("DOTFILES")})
-        cmd = "nvim"
+        cmd = ["nvim", *argv]
     elif is_available("vim"):
-        cmd = "vim"
+        cmd = ["vim", *argv]
     elif is_available("vi"):
-        cmd = "vi"
+        cmd = ["vi", *argv]
     elif is_available("nano"):
-        cmd = "nano"
+        cmd = ["nano", *argv]
     else:
         return failure("No known editor is available")
-    ret = subprocess.run([cmd, *argv], shell=True, env=env)
+
+    ret = subprocess.run(shlex.join(cmd), shell=True, env=env)
     return ("", ret.returncode)
 
 

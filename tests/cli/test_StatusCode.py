@@ -1,6 +1,6 @@
 import pytest
 
-from utils.cli import StatusCode, success, failure, sh_fnc
+from utils.cli import StatusCode, success, failure, sh_fnc, py_fnc
 
 
 test_msg = "test"
@@ -31,8 +31,16 @@ def test_unit_success_msg():
 
 
 def test_sh_fnc_failure():
-    assert sh_fnc(success)("") == StatusCode.FAILURE
+    assert sh_fnc(success)("") == StatusCode.SUCCESS
 
 
 def test_sh_fnc_success():
-    assert sh_fnc(failure)("") == StatusCode.SUCCESS
+    assert sh_fnc(failure)("") == StatusCode.FAILURE
+
+
+def test_py_fnc_failure():
+    assert py_fnc(success)("") == StatusCode.FAILURE
+
+
+def test_py_fnc_success():
+    assert py_fnc(failure)("") == StatusCode.SUCCESS

@@ -278,6 +278,33 @@ def _match_pairs() -> int:
     return sh_fnc(fnc)(*sys.argv[1:])
 
 
+def editor(argv: list[str]) -> tuple[str, int]:
+    import subprocess
+    import shutil
+
+    def is_available(name: str):
+        return shutil.which(name) is not None
+
+    env = os.environ.copy()
+    if is_available("nvim"):
+        env.update({"XDG_CONFIG_HOME": os.getenv("DOTFILES")})
+        cmd = "nvim"
+    elif is_available("vim"):
+        cmd = "vim"
+    elif is_available("vi"):
+        cmd = "vi"
+    elif is_available("nano"):
+        cmd = "nano"
+    else:
+        return failure("No known editor is available")
+    ret = subprocess.run([cmd, *argv], shell=True, env=env)
+    return ("", ret.returncode)
+
+
+def _editor() -> int:
+    return sh_fnc(editor)(sys.argv[1:])
+
+
 def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
     if len(sys.argv) != 2:
         return sh_fnc(failure)(f"{fnc.__doc__}")

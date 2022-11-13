@@ -12,7 +12,7 @@ __all__ = [
     "env",
     "failure",
     "success",
-    "sh_fnc",
+    "py_fnc",
     "to_snake_case",
     "to_kebab_case",
     "is_kebab_case",
@@ -77,7 +77,7 @@ match_lower = re.compile(r"^[a-z0-9]+$")
 match_envvar = re.compile(r"\$([A-Z_][A-Z0-9_]+)")
 
 
-def sh_fnc(fnc: Callable[[Any], tuple[str, int]]):
+def py_fnc(fnc: Callable[[Any], tuple[str, int]]):
     def inner(*args, **kwargs) -> int:
         (msg, status) = fnc(*args, **kwargs)
 
@@ -87,6 +87,20 @@ def sh_fnc(fnc: Callable[[Any], tuple[str, int]]):
             elif status == StatusCode.FAILURE:
                 sys.stderr.write(msg)
         return not status
+
+    return inner
+
+
+def sh_fnc(fnc: Callable[[Any], tuple[str, int]]):
+    def inner(*args, **kwargs) -> int:
+        (msg, status) = fnc(*args, **kwargs)
+
+        if msg:
+            if status == StatusCode.FAILURE:
+                sys.stdout.write(msg)
+            elif status == StatusCode.SUCCESS:
+                sys.stderr.write(msg)
+        return status
 
     return inner
 
@@ -224,10 +238,10 @@ def _parse_version() -> int:
     if len(sys.argv) == 1:
         (workspace, ok) = check_env("WORKSPACE")
         if not ok:
-            return sh_fnc(failure)(workspace)
+            return py_fnc(failure)(workspace)
         (project_name, ok) = check_env("PROJECT_NAME")
         if not ok:
-            return sh_fnc(failure)(project_name)
+            return py_fnc(failure)(project_name)
         path = pathlib.Path(workspace) / project_name / "__init__.py"
         sys.argv.append(str(path))
     return entrypoint_one_arg(parse_version)
@@ -273,9 +287,9 @@ def match_pairs(f1: str, f2: str) -> tuple[str, int]:
 def _match_pairs() -> int:
     fnc = match_pairs
     if len(sys.argv) != 3:
-        return sh_fnc(failure)(f"{fnc.__doc__}")
+        return py_fnc(failure)(f"{fnc.__doc__}")
 
-    return sh_fnc(fnc)(*sys.argv[1:])
+    return py_fnc(fnc)(*sys.argv[1:])
 
 
 def editor(argv: list[str]) -> tuple[str, int]:
@@ -307,12 +321,12 @@ def _editor() -> int:
 
 def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
     if len(sys.argv) != 2:
-        return sh_fnc(failure)(f"{fnc.__doc__}")
-    return sh_fnc(fnc)(sys.argv[1])
+        return py_fnc(failure)(f"{fnc.__doc__}")
+    return py_fnc(fnc)(sys.argv[1])
 
 
 def entrypoint_stdin(fnc: Callable[[str], tuple[str, int]]) -> int:
     raw = "".join(sys.stdin.readlines())
     if not raw:
-        return sh_fnc(failure)(f"{fnc.__doc__}")
-    return sh_fnc(fnc)(raw)
+        return py_fnc(failure)(f"{fnc.__doc__}")
+    return py_fnc(fnc)(raw)

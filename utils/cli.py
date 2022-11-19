@@ -322,6 +322,19 @@ def _editor() -> int:
     return sh_fnc(editor)(sys.argv[1:])
 
 
+def resolve_path(s: str) -> tuple[str, int]:
+    import pathlib
+
+    path = pathlib.Path(s)
+    if not path.exists():
+        return failure()
+    return success(str(path.resolve()))
+
+
+def _resolve_path() -> int:
+    return entrypoint_one_arg(resolve_path)
+
+
 def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
     if len(sys.argv) != 2:
         return py_fnc(failure)(f"{fnc.__doc__}")

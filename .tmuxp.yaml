@@ -1,3 +1,6 @@
+start_directory: $WORKSPACE
+session_name: $PROJECT_NAME
+
 plugins:
   - tmuxp_plugin_loader.plugin.Loader
 # shell_command_before:

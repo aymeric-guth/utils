@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Callable, Any, Union
 
 from .config import Config
 from . import cli
@@ -22,8 +22,9 @@ __all__ = [
 ]
 
 
-def clamp(lo: int | float, hi: int | float) -> Callable[[int | float], int | float]:
-    def inner(val: int | float) -> int | float:
+
+def clamp(lo: Union[int, float], hi: Union[int, float]) -> Callable[[Union[int, float]], Union[int, float]]:
+    def inner(val: Union[int, float]) -> Union[int, float]:
         return max(lo, min(val, hi))
 
     return inner

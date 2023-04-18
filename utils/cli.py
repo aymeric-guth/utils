@@ -1,5 +1,5 @@
 import functools
-from typing import Callable, Any
+from typing import Callable, Any, Tuple, Dict, List
 import os
 import sys
 import re
@@ -37,9 +37,9 @@ class StatusCode:
 
 class Environment:
     def __init__(self):
-        self._registry: dict[str, str] = {}
+        self._registry: Dict[str, str] = {}
 
-    def _register(self, varname: str) -> tuple[str, int]:
+    def _register(self, varname: str) -> Tuple[str, int]:
         (msg, ok) = check_env(varname)
         if not ok:
             return failure(msg)
@@ -52,13 +52,13 @@ class Environment:
             raise RuntimeError(f"Unexpected runtime error for {varname=} lookup")
         return value
 
-    def query(self, varname: str) -> tuple[str, int]:
+    def query(self, varname: str) -> Tuple[str, int]:
         value = self._registry.get(varname)
         if not value:
             return self._register(varname)
         return success(value)
 
-    def set(self, varname: str, value: str) -> tuple[str, int]:
+    def set(self, varname: str, value: str) -> Tuple[str, int]:
         prev = self._registry.get(varname)
         if not prev or value != prev:
             self._registry.update({varname: value})
@@ -78,7 +78,7 @@ match_lower = re.compile(r"^[a-z0-9]+$")
 match_envvar = re.compile(r"\$([A-Z_][A-Z0-9_]+)")
 
 
-def py_fnc(fnc: Callable[[Any], tuple[str, int]]):
+def py_fnc(fnc: Callable[[Any], Tuple[str, int]]):
     def inner(*args, **kwargs) -> int:
         (msg, status) = fnc(*args, **kwargs)
 
@@ -92,7 +92,7 @@ def py_fnc(fnc: Callable[[Any], tuple[str, int]]):
     return inner
 
 
-def sh_fnc(fnc: Callable[[Any], tuple[str, int]]):
+def sh_fnc(fnc: Callable[[Any], Tuple[str, int]]):
     def inner(*args, **kwargs) -> int:
         (msg, status) = fnc(*args, **kwargs)
 
@@ -106,15 +106,15 @@ def sh_fnc(fnc: Callable[[Any], tuple[str, int]]):
     return inner
 
 
-def to_snake_case(s: str) -> tuple[str, int]:
+def to_snake_case(s: str) -> Tuple[str, int]:
     return success("_".join(s.split("-")))
 
 
-def to_kebab_case(s: str) -> tuple[str, int]:
+def to_kebab_case(s: str) -> Tuple[str, int]:
     return success("-".join(s.split("_")))
 
 
-def is_kebab_case(s: str) -> tuple[str, int]:
+def is_kebab_case(s: str) -> Tuple[str, int]:
     """
     s: str
     """
@@ -125,7 +125,7 @@ def is_kebab_case(s: str) -> tuple[str, int]:
     return failure()
 
 
-def is_snake_case(s: str) -> tuple[str, int]:
+def is_snake_case(s: str) -> Tuple[str, int]:
     """
     s: str -> tuple[str, int]
     """
@@ -136,7 +136,7 @@ def is_snake_case(s: str) -> tuple[str, int]:
     return failure()
 
 
-def is_lower_case(s: str) -> tuple[str, int]:
+def is_lower_case(s: str) -> Tuple[str, int]:
     """
     s: str
     """
@@ -150,28 +150,28 @@ def is_lower_case(s: str) -> tuple[str, int]:
     return failure()
 
 
-def is_camel_case(s: str) -> tuple[str, int]:
+def is_camel_case(s: str) -> Tuple[str, int]:
     """
     s: str
     """
     raise NotImplementedError(s)
 
 
-def is_pascal_case(s: str) -> tuple[str, int]:
+def is_pascal_case(s: str) -> Tuple[str, int]:
     """
     s: str
     """
     raise NotImplementedError(s)
 
 
-def check_env(varname: str) -> tuple[str, int]:
+def check_env(varname: str) -> Tuple[str, int]:
     var = os.getenv(varname)
     if not var:
         return failure(f"{varname} is not defined")
     return success(var)
 
 
-def parse_version(path: str) -> tuple[str, int]:
+def parse_version(path: str) -> Tuple[str, int]:
     """
     usage: parse_version [/path/to/version/file.py]
     """
@@ -199,7 +199,7 @@ def parse_version(path: str) -> tuple[str, int]:
     return success(version[0])
 
 
-def generate_eggname(suffix: str) -> tuple[str, int]:
+def generate_eggname(suffix: str) -> Tuple[str, int]:
     (workspace, ok) = check_env("WORKSPACE")
     if not ok:
         return failure(workspace)
@@ -220,7 +220,7 @@ def generate_eggname(suffix: str) -> tuple[str, int]:
     return success(f"{project_name}-{version}-{suffix}")
 
 
-def expand_envvar_toml(s: str) -> tuple[str, int]:
+def expand_envvar_toml(s: str) -> Tuple[str, int]:
     while m := match_envvar.search(s):
         a, b = m.span()
         # TODO: check_env
@@ -276,7 +276,7 @@ def _to_kebab_case() -> int:
     return entrypoint_one_arg(to_kebab_case)
 
 
-def match_pairs(f1: str, f2: str) -> tuple[str, int]:
+def match_pairs(f1: str, f2: str) -> Tuple[str, int]:
     with open(f1) as f:
         ref = {i for i in f.read().split("\n")}
     with open(f2) as f:
@@ -293,7 +293,7 @@ def _match_pairs() -> int:
     return py_fnc(fnc)(*sys.argv[1:])
 
 
-def editor(argv: list[str]) -> tuple[str, int]:
+def editor(argv: List[str]) -> Tuple[str, int]:
     import subprocess
     import shutil
     import shlex
@@ -322,7 +322,7 @@ def _editor() -> int:
     return sh_fnc(editor)(sys.argv[1:])
 
 
-def resolve_path(s: str) -> tuple[str, int]:
+def resolve_path(s: str) -> Tuple[str, int]:
     import pathlib
 
     path = pathlib.Path(s)
@@ -335,13 +335,13 @@ def _resolve_path() -> int:
     return entrypoint_one_arg(resolve_path)
 
 
-def entrypoint_one_arg(fnc: Callable[[str], tuple[str, int]]) -> int:
+def entrypoint_one_arg(fnc: Callable[[str], Tuple[str, int]]) -> int:
     if len(sys.argv) != 2:
         return py_fnc(failure)(f"{fnc.__doc__}")
     return py_fnc(fnc)(sys.argv[1])
 
 
-def entrypoint_stdin(fnc: Callable[[str], tuple[str, int]]) -> int:
+def entrypoint_stdin(fnc: Callable[[str], Tuple[str, int]]) -> int:
     raw = "".join(sys.stdin.readlines())
     if not raw:
         return py_fnc(failure)(f"{fnc.__doc__}")

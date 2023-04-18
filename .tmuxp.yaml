@@ -29,7 +29,7 @@ windows:
     layout: even-horizontal
     panes:
       - shell_command:
-        - editor .
+        - $EDITOR .
     # options_after:
     # synchronize-panes: on
 
